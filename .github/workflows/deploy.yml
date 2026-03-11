@@ -70,6 +70,6 @@ jobs:
         SOURCE: "dist/"
         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
-        REMOTE_PORT: ${{ secrets.REMOTE_PORT || '12020' }}
+        REMOTE_PORT: ${{ secrets.REMOTE_PORT || '12022' }}
         TARGET: ${{ secrets.REMOTE_TARGET }}
         EXCLUDE: "/dist/, /node_modules/"
