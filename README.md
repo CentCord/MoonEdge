@@ -8,7 +8,7 @@
 
 - **框架**: [Astro](https://astro.build/) v4+
 - **包管理器**: pnpm
-- **部署**: GitHub Actions → 阿里云 ECS
+- **部署**: GitHub Actions → 私有服务器
 - **域名**: https://www.moonedge.cn
 
 ## 📦 本地开发
