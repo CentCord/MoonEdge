@@ -21,10 +21,13 @@ on:
       - 'astro.config.mjs'
       - 'tsconfig.json'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
