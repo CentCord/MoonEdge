@@ -42,15 +42,13 @@ pnpm preview
 
 ## 🔐 配置 Secrets
 
-在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中配置：
+在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中配置以下 secrets：
 
-| Secret | 说明 | 示例 |
-|--------|------|------|
-| `SSH_PRIVATE_KEY` | 服务器 SSH 私钥 | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
-| `REMOTE_HOST` | 服务器 IP | `8.138.251.181` |
-| `REMOTE_USER` | SSH 用户名 | `root` |
-| `REMOTE_TARGET` | 部署目标路径 | `/var/www/moonedge.cn` |
-| `REMOTE_PORT` | SSH 端口（可选）| `22` |
+- `SSH_PRIVATE_KEY` - 服务器 SSH 私钥
+- `REMOTE_HOST` - 服务器地址
+- `REMOTE_USER` - SSH 用户名
+- `REMOTE_TARGET` - 部署目标路径
+- `REMOTE_PORT` - SSH 端口（可选，默认 22）
 
 ## 📝 目录结构
 
@@ -72,10 +70,7 @@ pnpm preview
 
 1. 检查 GitHub Actions 日志
 2. 验证 Secrets 是否正确配置
-3. 测试 SSH 连接：
-   ```bash
-   ssh -i ~/.ssh/github_actions root@8.138.251.181
-   ```
+3. 测试 SSH 连接是否正常
 
 ### 构建失败
 
