@@ -3,23 +3,8 @@ name: Deploy to Server
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'astro.config.mjs'
-      - 'tsconfig.json'
-      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'astro.config.mjs'
-      - 'tsconfig.json'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
