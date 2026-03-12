@@ -1,0 +1,165 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("posts");
+
+const sortedPosts = posts.sort((a, b) => 
+  new Date(b.data.published).getTime() - new Date(a.data.published).getTime()
+);
+
+// 获取最新的博客文章
+const recentPosts = sortedPosts.slice(0, 6);
+
+// 获取摄影相关文章
+const photoPosts = sortedPosts
+  .filter(post => 
+    post.data.category === "摄影" || 
+    post.data.tags?.includes("摄影") ||
+    post.data.tags?.includes("Photos")
+  )
+  .slice(0, 6);
+---
+
+<Layout title="生活随笔">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-16">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 text-[var(--text-main)]">
+        Welcome to <span class="text-[var(--primary)]">生活随笔</span> 
+      </h1>
+      <p class="text-xl text-[var(--text-muted)] max-w-2xl mx-auto mb-8">
+        愿与君同在
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a 
+          href="/about/" 
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-medium
+                 hover:bg-[var(--primary)]/90 transition-colors"
+        >
+          <span>关于我</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </a>
+        <a 
+          href="https://lit.link/en/aulypc/" 
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]
+                 text-[var(--text-main)] hover:border-[var(--primary)] transition-colors"
+        >
+          <span>Lit.Link</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Photography Section -->
+    {photoPosts.length > 0 && (
+      <section class="mb-16">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-[var(--text-main)] flex items-center gap-2">
+            <span>📸</span> 摄影
+          </h2>
+          <a 
+            href="/gallery/" 
+            class="text-[var(--primary)] hover:underline flex items-center gap-1"
+          >
+            <span>查看全部摄影</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {photoPosts.map(post => (
+            <a
+              href={`/posts/${post.id}/`}
+              class="group relative aspect-square rounded-xl overflow-hidden bg-[var(--card-bg)] 
+                     border border-[var(--card-border)] hover:border-[var(--primary)] transition-all"
+            >
+              {post.data.image ? (
+                <img
+                  src={post.data.image}
+                  alt={post.data.title}
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12z"></path>
+                  </svg>
+                </div>
+              )}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
+                          opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="absolute bottom-0 left-0 right-0 p-3">
+                  <h3 class="text-white text-sm font-medium truncate">{post.data.title}</h3>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Blog Section -->
+    <section class="mb-16">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-[var(--text-main)] flex items-center gap-2">
+          <span>📝</span> 博客
+        </h2>
+        <a 
+          href="/archive/" 
+          class="text-[var(--primary)] hover:underline flex items-center gap-1"
+        >
+          <span>查看全部文章</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {recentPosts.map(post => (
+          <a
+            href={`/posts/${post.id}/`}
+            class="group flex gap-4 p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--primary)] transition-all duration-300"
+          >
+            {post.data.image && (
+              <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                <img
+                  src={post.data.image}
+                  alt={post.data.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            )}
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
+                  {post.data.category || "文章"}
+                </span>
+                <span class="text-xs text-[var(--text-muted)]">
+                  {new Date(post.data.published).toLocaleDateString("zh-CN")}
+                </span>
+              </div>
+              <h3 class="font-medium text-[var(--text-main)] group-hover:text-[var(--primary)] mb-1 line-clamp-2">
+                {post.data.title}
+              </h3>
+              <p class="text-sm text-[var(--text-muted)] line-clamp-2">
+                {post.data.description || "暂无描述"}
+              </p>
+              <div class="flex items-center gap-2 mt-2 text-xs text-[var(--text-muted)]">
+                <span>{post.data.tags?.slice(0, 3).map(tag => `#${tag}`).join(" ")}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

@@ -1,0 +1,90 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("posts");
+
+// 筛选摄影相关的文章
+const photoPosts = posts
+  .filter(post => 
+    post.data.category === "摄影" || 
+    post.data.tags?.includes("摄影") ||
+    post.data.tags?.includes("Photos")
+  )
+  .sort((a, b) => new Date(b.data.published).getTime() - new Date(a.data.published).getTime());
+---
+
+<Layout title="摄影 | Gallery">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4 text-[var(--text-main)]">
+        📸 摄影
+      </h1>
+      <p class="text-[var(--text-muted)] max-w-2xl mx-auto">
+        记录生活中的美好瞬间，用镜头捕捉光影。
+      </p>
+    </div>
+
+    <!-- Photo Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {photoPosts.map(post => (
+        <a
+          href={`/posts/${post.id}/`}
+          class="group relative aspect-square rounded-xl overflow-hidden bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--primary)] transition-all duration-300"
+        >
+          {post.data.image ? (
+            <img
+              src={post.data.image}
+              alt={post.data.title}
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+              <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          )}
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
+                      opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute bottom-0 left-0 right-0 p-4">
+              <h3 class="text-white font-medium truncate">{post.data.title}</h3>
+              <p class="text-white/70 text-sm">
+                {new Date(post.data.published).toLocaleDateString("zh-CN")}
+              </p>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {photoPosts.length === 0 && (
+      <div class="text-center py-20">
+        <svg class="w-16 h-16 mx-auto mb-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <p class="text-[var(--text-muted)]">暂无摄影作品</p>
+        <p class="text-sm text-[var(--text-muted)] mt-2">添加带有"摄影"标签的文章来展示</p>
+      </div>
+    )}
+
+    <!-- View All Link -->
+    <div class="text-center mt-12">
+      <a 
+        href="/archive/category/摄影/" 
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]
+               text-[var(--text-main)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all duration-300"
+      >
+        <span>查看全部摄影</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</Layout>

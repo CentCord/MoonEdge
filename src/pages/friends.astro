@@ -1,0 +1,105 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("posts");
+---
+
+<Layout title="友链 | Friends">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4 text-[var(--text-main)]">
+        ✨ 友情链接
+      </h1>
+      <p class="text-[var(--text-muted)] max-w-2xl mx-auto">
+        欢迎交换友链！这里记录着我关注的优秀博客和朋友们的小窝。
+      </p>
+    </div>
+
+    <!-- Friends Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+      {[
+        {
+          title: "AULyPcのBlog",
+          url: "https://blog.aulypc0x0.online",
+          img: "https://blog.aulypc0x0.online/favicon/favicon_amiya.webp",
+          desc: "今日も生きててえらい ☁"
+        },
+        {
+          title: "Fuwari",
+          url: "https://github.com/saicaca/fuwari",
+          img: "https://github.com/saicaca.png",
+          desc: "A static blog template built with Astro"
+        }
+      ].map(friend => (
+        <a
+          href={friend.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group flex items-center gap-4 p-4 rounded-xl bg-[var(--card-bg)] 
+                 border border-[var(--card-border)] hover:border-[var(--primary)] 
+                 transition-all duration-300"
+        >
+          <img
+            src={friend.img}
+            alt={friend.title}
+            class="w-12 h-12 rounded-full object-cover border-2 border-[var(--card-border)]
+                   group-hover:border-[var(--primary)] transition-colors"
+            onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(this.alt)"
+          />
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-[var(--text-main)] group-hover:text-[var(--primary)] truncate">
+              {friend.title}
+            </h3>
+            <p class="text-sm text-[var(--text-muted)] line-clamp-1">
+              {friend.desc}
+            </p>
+          </div>
+          <svg class="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </a>
+      ))}
+    </div>
+
+    <!-- Apply for Link -->
+    <div class="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-6 mb-8">
+      <h2 class="text-xl font-bold mb-4 text-[var(--text-main)] flex items-center gap-2">
+        <span>📝</span> 申请友链
+      </h2>
+      <p class="text-[var(--text-muted)] mb-4">
+        欢迎在评论区留言申请友链，或者通过邮件联系我。请提供以下信息：
+      </p>
+      <div class="bg-[var(--code-bg)] rounded-lg p-4 font-mono text-sm text-[var(--text-main)] overflow-x-auto">
+        <pre>title: "你的站点名称",
+imgurl: "你的头像地址",
+desc: "站点描述",
+siteurl: "你的站点链接"</pre>
+      </div>
+      <div class="mt-4 p-4 bg-[var(--primary)]/5 rounded-lg border border-[var(--primary)]/20">
+        <p class="text-[var(--text-main)]">
+          <strong class="text-[var(--primary)]">我的站点信息：</strong>
+        </p>
+        <div class="mt-2 bg-[var(--code-bg)] rounded-lg p-4 font-mono text-sm text-[var(--text-main)]">
+          <pre>title: "生活随笔",
+imgurl: "https://www.moonedge.cn/favicon/icon.png",
+desc: "愿与君同在",
+siteurl: "https://www.moonedge.cn"</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-6">
+      <h2 class="text-xl font-bold mb-4 text-[var(--text-main)] flex items-center gap-2">
+        <span>💬</span> 留言板
+      </h2>
+      <p class="text-[var(--text-muted)] mb-4">
+        评论功能即将上线，敬请期待！
+      </p>
+    </div>
+  </div>
+</Layout>

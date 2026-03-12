@@ -43,7 +43,15 @@ export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
 		LinkPreset.Archive,
+		{
+			name: "摄影📸",
+			url: "/gallery/",
+		},
 		LinkPreset.About,
+		{
+			name: "友链✨",
+			url: "/friends/",
+		},
 	],
 };
 
