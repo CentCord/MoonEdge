@@ -13,6 +13,9 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+import Backlinks from "../../components/Backlinks.astro";
+import ReadingProgress from "../../components/ReadingProgress.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -47,6 +50,7 @@ const jsonLd = {
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+    <ReadingProgress />
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
@@ -107,6 +111,9 @@ const jsonLd = {
             </Markdown>
 
             {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
+
+            <!-- Backlinks -->
+            <Backlinks currentPostId={entry.id} currentTags={entry.data.tags || []} />
 
         </div>
     </div>

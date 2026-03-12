@@ -1,0 +1,65 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  currentPostId: string;
+  currentTags: string[];
+}
+
+const { currentPostId, currentTags } = Astro.props;
+
+const posts = await getCollection("posts");
+
+// 查找相关文章（共享标签）
+const relatedPosts = posts
+  .filter(post => post.id !== currentPostId)
+  .map(post => {
+    const sharedTags = post.data.tags?.filter(tag => currentTags.includes(tag)) || [];
+    return {
+      ...post,
+      sharedTags,
+      relevance: sharedTags.length,
+    };
+  })
+  .filter(post => post.relevance > 0)
+  .sort((a, b) => b.relevance - a.relevance)
+  .slice(0, 5);
+---
+
+{relatedPosts.length > 0 && (
+  <div class="backlinks mt-12 pt-8 border-t border-[var(--card-border)]">
+    <h3 class="text-xl font-bold mb-6 text-[var(--text-main)] flex items-center gap-2">
+      <span>🔗</span> 相关文章
+    </h3>
+    <div class="grid grid-cols-1 gap-4">
+      {relatedPosts.map(post => (
+        <a 
+          href={`/posts/${post.id}/`}
+          class="group flex items-start gap-4 p-4 rounded-xl bg-[var(--card-bg)] 
+                 border border-[var(--card-border)] hover:border-[var(--primary)] 
+                 transition-all duration-300"
+        >
+          <div class="flex-1 min-w-0">
+            <h4 class="font-medium text-[var(--text-main)] group-hover:text-[var(--primary)] mb-1 truncate">
+              {post.data.title}
+            </h4>
+            <p class="text-sm text-[var(--text-muted)] line-clamp-2">
+              {post.data.description || post.data.summary}
+            </p>
+            <div class="flex flex-wrap gap-1 mt-2">
+              {post.sharedTags.map(tag => (
+                <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div class="text-right text-xs text-[var(--text-muted)]">
+            <span class="text-[var(--primary)] font-medium">{post.relevance}</span>
+            <span>个共同标签</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+)}

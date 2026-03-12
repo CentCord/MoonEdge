@@ -1,0 +1,143 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import GardenGraph from "@/components/GardenGraph.astro";
+import TagCloud from "@/components/TagCloud.astro";
+import Backlinks from "@/components/Backlinks.astro";
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("posts");
+
+// 提取所有标签
+const allTags = posts.flatMap(post => post.data.tags || []);
+const tagCounts = allTags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+// 构建文章关系图数据
+const nodes = posts.map(post => ({
+  id: post.id,
+  title: post.data.title,
+  tags: post.data.tags || [],
+  date: post.data.published,
+}));
+
+// 查找相关文章（共享标签）
+const links: { source: string; target: string; strength: number }[] = [];
+for (let i = 0; i < posts.length; i++) {
+  for (let j = i + 1; j < posts.length; j++) {
+    const sharedTags = posts[i].data.tags?.filter(tag => 
+      posts[j].data.tags?.includes(tag)
+    ) || [];
+    if (sharedTags.length > 0) {
+      links.push({
+        source: posts[i].id,
+        target: posts[j].id,
+        strength: sharedTags.length,
+      });
+    }
+  }
+}
+---
+
+<Layout title="数字花园 | Digital Garden">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4 text-[var(--text-main)]">
+        🌱 数字花园
+      </h1>
+      <p class="text-[var(--text-muted)] max-w-2xl mx-auto">
+        这里是我的知识花园，文章之间通过标签和主题相互连接。
+        探索不同主题，发现文章之间的隐藏联系。
+      </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="bg-[var(--card-bg)] rounded-xl p-6 border border-[var(--card-border)]">
+        <div class="text-3xl font-bold text-[var(--primary)]">{posts.length}</div>
+        <div class="text-[var(--text-muted)]">篇文章</div>
+      </div>
+      <div class="bg-[var(--card-bg)] rounded-xl p-6 border border-[var(--card-border)]">
+        <div class="text-3xl font-bold text-[var(--primary)]">{Object.keys(tagCounts).length}</div>
+        <div class="text-[var(--text-muted)]">个标签</div>
+      </div>
+      <div class="bg-[var(--card-bg)] rounded-xl p-6 border border-[var(--card-border)]">
+        <div class="text-3xl font-bold text-[var(--primary)]">{links.length}</div>
+        <div class="text-[var(--text-muted)]">个连接</div>
+      </div>
+    </div>
+
+    <!-- Tag Cloud -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-[var(--text-main)] flex items-center gap-2">
+        <span>🏷️</span> 标签云
+      </h2>
+      <TagCloud tags={tagCounts} />
+    </section>
+
+    <!-- Graph View -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-[var(--text-main)] flex items-center gap-2">
+        <span>🕸️</span> 知识图谱
+      </h2>
+      <GardenGraph nodes={nodes} links={links} />
+    </section>
+
+    <!-- Recent Posts with Backlinks Preview -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-[var(--text-main)] flex items-center gap-2">
+        <span>📝</span> 最近更新
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {posts.slice(0, 6).map(post => (
+          <a 
+            href={`/posts/${post.id}/`}
+            class="group bg-[var(--card-bg)] rounded-xl p-5 border border-[var(--card-border)] 
+                   hover:border-[var(--primary)] transition-all duration-300"
+          >
+            <h3 class="font-semibold text-[var(--text-main)] group-hover:text-[var(--primary)] mb-2">
+              {post.data.title}
+            </h3>
+            <p class="text-sm text-[var(--text-muted)] line-clamp-2 mb-3">
+              {post.data.description || post.data.summary}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {post.data.tags?.slice(0, 3).map(tag => (
+                <span class="text-xs px-2 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Random Exploration -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-[var(--text-main)] flex items-center gap-2">
+        <span>🎲</span> 随机探索
+      </h2>
+      <div 
+        id="random-post"
+        class="bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary)]/5 
+               rounded-xl p-8 border border-[var(--primary)]/30 text-center cursor-pointer
+               hover:from-[var(--primary)]/30 hover:to-[var(--primary)]/10 transition-all"
+      >
+        <div class="text-4xl mb-4">🎲</div>
+        <p class="text-[var(--text-muted)] mb-2">点击发现一篇随机文章</p>
+        <p class="text-sm text-[var(--text-muted)]/70">在知识的海洋中漫游</p>
+      </div>
+    </section>
+  </div>
+
+  <script define:vars={{ posts: posts.map(p => ({ id: p.id, title: p.data.title })) }}>
+    const randomBtn = document.getElementById('random-post');
+    randomBtn?.addEventListener('click', () => {
+      const randomPost = posts[Math.floor(Math.random() * posts.length)];
+      window.location.href = `/posts/${randomPost.id}/`;
+    });
+  </script>
+</Layout>

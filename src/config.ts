@@ -43,6 +43,10 @@ export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
 		LinkPreset.Archive,
+		{
+			name: "花园",
+			url: "/garden/",
+		},
 		LinkPreset.About,
 	],
 };

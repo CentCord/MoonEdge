@@ -1,0 +1,79 @@
+---
+interface Props {
+  tags: Record<string, number>;
+}
+
+const { tags } = Astro.props;
+
+// 计算标签大小
+const maxCount = Math.max(...Object.values(tags));
+const minCount = Math.min(...Object.values(tags));
+
+const getTagSize = (count: number) => {
+  if (maxCount === minCount) return 1;
+  const normalized = (count - minCount) / (maxCount - minCount);
+  return 0.8 + normalized * 1.5; // 0.8 到 2.3 倍大小
+};
+
+const getTagColor = (count: number) => {
+  // 根据使用频率返回不同的颜色强度
+  if (maxCount === minCount) return 'opacity-70';
+  const normalized = (count - minCount) / (maxCount - minCount);
+  if (normalized > 0.8) return 'text-[var(--primary)] font-semibold';
+  if (normalized > 0.5) return 'text-[var(--primary)]/80';
+  if (normalized > 0.3) return 'text-[var(--text-main)] opacity-80';
+  return 'text-[var(--text-muted)]';
+};
+
+// 打乱标签顺序
+const shuffledTags = Object.entries(tags).sort(() => Math.random() - 0.5);
+---
+
+<div class="tag-cloud flex flex-wrap gap-3 justify-center p-6 bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)]">
+  {shuffledTags.map(([tag, count]) => (
+    <a
+      href={`/archive/?tag=${encodeURIComponent(tag)}`}
+      class={`tag-item px-3 py-1.5 rounded-full border border-[var(--card-border)] 
+              hover:border-[var(--primary)] hover:bg-[var(--primary)]/10 
+              transition-all duration-300 ${getTagColor(count)}`}
+      style={`font-size: ${getTagSize(count)}rem;`}
+      title={`${count} 篇文章`}
+    >
+      #{tag}
+      <span class="text-xs ml-1 opacity-50">({count})</span>
+    </a>
+  ))}
+</div>
+
+<style>
+  .tag-cloud {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tag-item {
+    animation: fadeInUp 0.5s ease-out backwards;
+  }
+  
+  .tag-item:nth-child(1) { animation-delay: 0.05s; }
+  .tag-item:nth-child(2) { animation-delay: 0.1s; }
+  .tag-item:nth-child(3) { animation-delay: 0.15s; }
+  .tag-item:nth-child(4) { animation-delay: 0.2s; }
+  .tag-item:nth-child(5) { animation-delay: 0.25s; }
+  .tag-item:nth-child(6) { animation-delay: 0.3s; }
+  .tag-item:nth-child(7) { animation-delay: 0.35s; }
+  .tag-item:nth-child(8) { animation-delay: 0.4s; }
+  .tag-item:nth-child(9) { animation-delay: 0.45s; }
+  .tag-item:nth-child(10) { animation-delay: 0.5s; }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

@@ -1,0 +1,272 @@
+---
+---
+
+<div id="search-container" class="relative">
+  <!-- Search Button -->
+  <button
+    id="search-trigger"
+    class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)]
+           text-[var(--text-muted)] hover:border-[var(--primary)] hover:text-[var(--primary)]
+           transition-all duration-300 text-sm"
+  >
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <span class="hidden md:inline">搜索</span>
+    <span class="hidden lg:inline text-xs px-1.5 py-0.5 rounded bg-[var(--card-border)] text-[var(--text-muted)]">Ctrl K</span>
+  </button>
+
+  <!-- Search Modal -->
+  <div
+    id="search-modal"
+    class="fixed inset-0 z-50 hidden"
+    aria-hidden="true"
+  >
+    <!-- Backdrop -->
+    <div
+      id="search-backdrop"
+      class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+    ></div>
+
+    <!-- Modal Content -->
+    <div class="absolute inset-0 flex items-start justify-center pt-[10vh] px-4">
+      <div
+        id="search-panel"
+        class="w-full max-w-2xl bg-[var(--card-bg)] rounded-2xl shadow-2xl border border-[var(--card-border)]
+               transform scale-95 opacity-0 transition-all duration-300 overflow-hidden"
+      >
+        <!-- Search Input -->
+        <div class="flex items-center gap-3 p-4 border-b border-[var(--card-border)]">
+          <svg class="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="搜索文章、标签..."
+            class="flex-1 bg-transparent border-none outline-none text-[var(--text-main)] placeholder:text-[var(--text-muted)]"
+            autocomplete="off"
+          />
+          <button
+            id="search-close"
+            class="p-1 rounded-lg hover:bg-[var(--card-border)] text-[var(--text-muted)] transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results" class="max-h-[60vh] overflow-y-auto">
+          <div class="p-8 text-center text-[var(--text-muted)]">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <p>输入关键词开始搜索</p>
+            <p class="text-sm mt-1 opacity-70">支持文章标题、标签搜索</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between px-4 py-2 border-t border-[var(--card-border)] text-xs text-[var(--text-muted)]">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1">
+              <kbd class="px-1.5 py-0.5 rounded bg-[var(--card-border)]">↑</kbd>
+              <kbd class="px-1.5 py-0.5 rounded bg-[var(--card-border)]">↓</kbd>
+              <span class="ml-1">选择</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <kbd class="px-1.5 py-0.5 rounded bg-[var(--card-border)]">↵</kbd>
+              <span class="ml-1">打开</span>
+            </span>
+          </div>
+          <span id="search-stats"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 搜索数据将在构建时注入
+  const searchData = [];
+  
+  const searchTrigger = document.getElementById('search-trigger');
+  const searchModal = document.getElementById('search-modal');
+  const searchBackdrop = document.getElementById('search-backdrop');
+  const searchPanel = document.getElementById('search-panel');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchClose = document.getElementById('search-close');
+  const searchResults = document.getElementById('search-results');
+  const searchStats = document.getElementById('search-stats');
+  
+  let isOpen = false;
+  let selectedIndex = -1;
+  let results: any[] = [];
+  
+  function openModal() {
+    isOpen = true;
+    searchModal?.classList.remove('hidden');
+    searchModal?.setAttribute('aria-hidden', 'false');
+    
+    setTimeout(() => {
+      searchBackdrop?.classList.remove('opacity-0');
+      searchPanel?.classList.remove('scale-95', 'opacity-0');
+      searchInput?.focus();
+    }, 10);
+    
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeModal() {
+    isOpen = false;
+    searchBackdrop?.classList.add('opacity-0');
+    searchPanel?.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+      searchModal?.classList.add('hidden');
+      searchModal?.setAttribute('aria-hidden', 'true');
+      searchInput.value = '';
+      clearResults();
+    }, 300);
+    
+    document.body.style.overflow = '';
+  }
+  
+  function clearResults() {
+    results = [];
+    selectedIndex = -1;
+    if (searchResults) {
+      searchResults.innerHTML = `
+        <div class="p-8 text-center text-[var(--text-muted)]">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <p>输入关键词开始搜索</p>
+          <p class="text-sm mt-1 opacity-70">支持文章标题、标签搜索</p>
+        </div>
+      `;
+    }
+    if (searchStats) searchStats.textContent = '';
+  }
+  
+  function highlightMatch(text: string, query: string) {
+    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    return text.replace(regex, '<mark class="bg-[var(--primary)]/30 text-[var(--primary)] px-0.5 rounded">$1</mark>');
+  }
+  
+  function escapeRegex(str: string) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  
+  function renderResults() {
+    if (results.length === 0) {
+      searchResults!.innerHTML = `
+        <div class="p-8 text-center text-[var(--text-muted)]">
+          <p>没有找到相关结果</p>
+        </div>
+      `;
+      searchStats!.textContent = '0 个结果';
+      return;
+    }
+    
+    const html = results.map((result, index) => `
+      <a
+        href="${result.url}"
+        class="search-result block px-4 py-3 hover:bg-[var(--primary)]/5 transition-colors ${index === selectedIndex ? 'bg-[var(--primary)]/10' : ''}"
+        data-index="${index}"
+      >
+        <div class="flex items-start gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-[var(--text-main)] mb-1 line-clamp-1">
+              ${highlightMatch(result.title, searchInput.value)}
+            </div>
+            <div class="text-sm text-[var(--text-muted)] line-clamp-2">
+              ${result.description || ''}
+            </div>
+            <div class="flex flex-wrap gap-1 mt-2">
+              ${result.tags?.map((tag: string) => `
+                <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
+                  #${tag}
+                </span>
+              `).join('') || ''}
+            </div>
+          </div>
+        </div>
+      </a>
+    `).join('');
+    
+    searchResults!.innerHTML = html;
+    searchStats!.textContent = `${results.length} 个结果`;
+    
+    // 添加点击事件
+    document.querySelectorAll('.search-result').forEach(el => {
+      el.addEventListener('click', () => {
+        closeModal();
+      });
+    });
+  }
+  
+  function performSearch(query: string) {
+    if (!query.trim()) {
+      clearResults();
+      return;
+    }
+    
+    const lowerQuery = query.toLowerCase();
+    results = searchData.filter(item => 
+      item.title.toLowerCase().includes(lowerQuery) ||
+      item.description?.toLowerCase().includes(lowerQuery) ||
+      item.tags?.some((tag: string) => tag.toLowerCase().includes(lowerQuery))
+    );
+    
+    selectedIndex = results.length > 0 ? 0 : -1;
+    renderResults();
+  }
+  
+  // 事件监听
+  searchTrigger?.addEventListener('click', openModal);
+  searchClose?.addEventListener('click', closeModal);
+  searchBackdrop?.addEventListener('click', closeModal);
+  
+  searchInput?.addEventListener('input', (e) => {
+    performSearch((e.target as HTMLInputElement).value);
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + K 打开搜索
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openModal();
+    }
+    
+    if (!isOpen) return;
+    
+    // ESC 关闭
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+    
+    // 上下选择
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
+      renderResults();
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+      renderResults();
+    }
+    
+    // Enter 打开
+    if (e.key === 'Enter' && selectedIndex >= 0) {
+      const result = results[selectedIndex];
+      if (result) {
+        window.location.href = result.url;
+        closeModal();
+      }
+    }
+  });
+</script>

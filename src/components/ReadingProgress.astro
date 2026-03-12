@@ -1,0 +1,67 @@
+---
+---
+
+<div id="reading-progress" class="fixed top-0 left-0 w-full h-1 z-50 opacity-0 transition-opacity duration-300">
+  <div id="progress-bar" class="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/70 w-0 transition-all duration-100"></div>
+</div>
+
+<div id="reading-stats" class="fixed bottom-6 right-6 z-40 opacity-0 transition-opacity duration-300 pointer-events-none">
+  <div class="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full px-4 py-2 shadow-lg flex items-center gap-2 text-sm text-[var(--text-muted)]">
+    <span id="read-percent">0%</span>
+    <span class="w-px h-4 bg-[var(--card-border)]"></span>
+    <span id="read-time">剩余 ~0 分钟</span>
+  </div>
+</div>
+
+<script>
+  const progressBar = document.getElementById('progress-bar');
+  const progressContainer = document.getElementById('reading-progress');
+  const readStats = document.getElementById('reading-stats');
+  const readPercent = document.getElementById('read-percent');
+  const readTime = document.getElementById('read-time');
+  
+  // 获取文章内容的字数和预估阅读时间
+  const content = document.querySelector('.markdown-content');
+  const words = content?.textContent?.length || 0;
+  const totalMinutes = Math.ceil(words / 300);
+  
+  let ticking = false;
+  
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
+    
+    progressBar.style.width = `${progress}%`;
+    readPercent.textContent = `${Math.round(progress)}%`;
+    
+    // 计算剩余阅读时间
+    const remainingMinutes = Math.ceil((totalMinutes * (100 - progress)) / 100);
+    if (remainingMinutes > 0) {
+      readTime.textContent = `剩余 ~${remainingMinutes} 分钟`;
+    } else {
+      readTime.textContent = '已读完';
+    }
+    
+    // 显示/隐藏进度条
+    if (scrollTop > 100) {
+      progressContainer.classList.remove('opacity-0');
+      readStats.classList.remove('opacity-0');
+    } else {
+      progressContainer.classList.add('opacity-0');
+      readStats.classList.add('opacity-0');
+    }
+    
+    ticking = false;
+  }
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateProgress);
+      ticking = true;
+    }
+  }, { passive: true });
+  
+  // 初始化
+  updateProgress();
+</script>
