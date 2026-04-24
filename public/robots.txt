@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.moonedge.cn/sitemap-index.xml
