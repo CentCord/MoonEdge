@@ -1,19 +1,15 @@
-name: Deploy to GitHub Pages
+name: Deploy site
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
-# Pages 部署需要的权限
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# 确保只有一个部署任务同时运行
 concurrency:
-  group: "pages"
+  group: "site-deploy"
   cancel-in-progress: false
 
 jobs:
@@ -55,19 +51,3 @@ jobs:
             -e "ssh -p ${{ secrets.REMOTE_PORT || '22' }}" \
             dist/ \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist  # Astro默认构建输出目录
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
