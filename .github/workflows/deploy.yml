@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 # Pages 部署需要的权限
@@ -42,6 +42,19 @@ jobs:
 
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to remote server
+        run: |
+          ssh-keyscan -H -p ${{ secrets.REMOTE_PORT || '22' }} ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.REMOTE_PORT || '22' }}" \
+            dist/ \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
