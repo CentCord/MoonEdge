@@ -51,16 +51,10 @@ export const siteConfig: SiteConfig = {
 	site_url: "https://moonedge.cn",
 
 	// 站点描述
-	description:
-		"MoonEdge 的个人博客，分享技术与生活",
+	description: "MoonEdge 的个人博客，分享技术与生活",
 
 	// 站点关键词
-	keywords: [
-		"MoonEdge",
-		"博客",
-		"技术",
-		"生活",
-	],
+	keywords: ["MoonEdge", "博客", "技术", "生活"],
 
 	// 主题色
 	themeColor: {

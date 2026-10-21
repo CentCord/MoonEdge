@@ -44,10 +44,23 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to remote server
+      - name: Verify SSH connection
         run: |
           ssh-keyscan -H -p ${{ secrets.REMOTE_PORT || '22' }} ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          ssh \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=30 \
+            -o ConnectionAttempts=1 \
+            -o ServerAliveInterval=15 \
+            -o ServerAliveCountMax=2 \
+            -p "${{ secrets.REMOTE_PORT || '22' }}" \
+            "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" \
+            true
+
+      - name: Deploy to remote server
+        run: |
           rsync -avz --delete \
-            -e "ssh -p ${{ secrets.REMOTE_PORT || '22' }}" \
+            -e "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 -p ${{ secrets.REMOTE_PORT || '22' }}" \
             dist/ \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
